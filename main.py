@@ -25,7 +25,7 @@ test_data = datasets.FashionMNIST(
 batch_size = 64
 
 # Create data loaders.
-train_dataloader = DataLoader(training_data, batch_size=batch_size)
+train_dataloader = DataLoader(training_data, batch_size=batch_size, shuffle=True)
 test_dataloader = DataLoader(test_data, batch_size=batch_size)
 
 for X, y in test_dataloader:
@@ -53,8 +53,10 @@ class NeuralNetwork(nn.Module):
         self.linear_relu_stack = nn.Sequential(
             nn.Linear(28*28, 512), # Input layer converting 784 inputs to 512 outputs
             nn.ReLU(), # ReLU activation function
+            nn.Dropout(0.2) , # Dropout layer for regularization
             nn.Linear(512, 512), # Hidden layer converting 512 inputs to 512 outputs
             nn.ReLU(), # ReLU activation function
+            nn.Dropout(0.2), # Dropout layer for regularization
             nn.Linear(512, 10) # Output layer converting 512 inputs to 10 outputs (one for each class)
         )
 
@@ -114,8 +116,9 @@ def test(dataloader, model, loss_fn):
 # ==========
 
 # ===== Run Model =====
+
 loss_fn = nn.CrossEntropyLoss()
-optimiser = torch.optim.SGD(model.parameters(), lr=1e-3)
+optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
 epochs = 5
 
 for t in range(epochs):
@@ -123,3 +126,9 @@ for t in range(epochs):
     train(train_dataloader, model, loss_fn, optimiser)
     test(test_dataloader, model, loss_fn)
 print("Done!")
+
+# Save model state
+torch.save(model.state_dict(), "model.pth")
+print("Saved PyTorch Model State to model.pth")
+
+# ==========
